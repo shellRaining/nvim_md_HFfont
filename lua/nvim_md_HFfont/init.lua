@@ -25,7 +25,6 @@ local inCodeBlock = function(node)
     local parent = node:parent()
 
     while parent do
-        vim.notify(parent:type())
         if parent:type() == "fenced_code_block" then
             return true
         end
@@ -38,7 +37,6 @@ end
 M.setup = function()
     api.nvim_create_user_command("SubstituteHalf", function()
         local punctuationPositions = findPunctuationPositions()
-        vim.notify(vim.inspect(punctuationPositions))
         if #punctuationPositions == 0 then
             print("No half font found.")
             return
