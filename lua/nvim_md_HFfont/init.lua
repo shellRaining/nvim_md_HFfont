@@ -22,47 +22,52 @@ local function findPunctuationPositions()
 end
 
 local inCodeBlock = function(node)
-    local parent = node:parent()
-
-    while parent do
-        if parent:type() == "fenced_code_block" then
+    while node do
+        if node:type() == "fenced_code_block" then
             return true
         end
-        parent = parent:parent()
+        node = node:parent()
     end
 
     return false
 end
 
-M.setup = function()
-    api.nvim_create_user_command("SubstituteHalf", function()
-        local punctuationPositions = findPunctuationPositions()
-        if #punctuationPositions == 0 then
-            print("No half font found.")
-            return
-        end
+local function execute()
+    local punctuationPositions = findPunctuationPositions()
+    -- note the key is number, so can not use # to get len
+    local count = 0
+    for _ in pairs(punctuationPositions) do
+        count = count + 1
+    end
+    if count == 0 then
+        return
+    end
 
-        -- get the treesitter node from position
-        local cur_buf = api.nvim_get_current_buf()
-        for i, linePositions in pairs(punctuationPositions) do
-            for _, col in pairs(linePositions) do
-                local node = vim.treesitter.get_node({
-                    bufnr = cur_buf,
-                    pos = { i - 1, col - 1 },
-                })
+    -- get the treesitter node from position
+    local cur_buf = api.nvim_get_current_buf()
+    for row, linePositions in pairs(punctuationPositions) do
+        for _, col in pairs(linePositions) do
+            local node = vim.treesitter.get_node({
+                bufnr = cur_buf,
+                pos = { row - 1, col - 1 },
+            })
 
-                if node and not inCodeBlock(node) then
-                    -- get the char in the position
-                    local char = api.nvim_buf_get_lines(cur_buf, i - 1, i, false)[1]:sub(col, col)
-                    if char == "." then
-                        api.nvim_buf_set_text(cur_buf, i - 1, col - 1, i - 1, col, { "。" })
-                    elseif char == "," then
-                        api.nvim_buf_set_text(cur_buf, i - 1, col - 1, i - 1, col, { "，" })
-                    end
+            if node and not inCodeBlock(node) then
+                -- get the char in the position
+                local char = api.nvim_buf_get_lines(cur_buf, row - 1, row, false)[1]:sub(col, col)
+                if char == "." then
+                    api.nvim_buf_set_text(cur_buf, row - 1, col - 1, row - 1, col, { "。" })
+                elseif char == "," then
+                    api.nvim_buf_set_text(cur_buf, row - 1, col - 1, row - 1, col, { "，" })
                 end
+                execute()
             end
         end
-    end, {})
+    end
+end
+
+M.setup = function()
+    api.nvim_create_user_command("SubstituteHalf", execute, {})
 end
 
 return M
