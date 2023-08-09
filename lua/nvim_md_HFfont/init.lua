@@ -22,8 +22,20 @@ local function findPunctuationPositions()
 end
 
 local inCodeBlock = function(node)
+    local ignoreType = {
+        "html_block",
+        "code_block",
+        "fenced_code_block",
+        "atx_heading",
+        "atx_h1_marker",
+        "atx_h2_marker",
+        "atx_h3_marker",
+        "atx_h4_marker",
+        "atx_h5_marker",
+        "atx_h6_marker",
+    }
     while node do
-        if node:type() == "fenced_code_block" then
+        if vim.tbl_contains(ignoreType, node:type()) then
             return true
         end
         node = node:parent()
