@@ -33,6 +33,11 @@ local inCodeBlock = function(node)
         "atx_h4_marker",
         "atx_h5_marker",
         "atx_h6_marker",
+        "list_marker_dot",
+        "link_reference_definition",
+        "link_title",
+        "link_label",
+        "link_destination",
     }
     while node do
         if vim.tbl_contains(ignoreType, node:type()) then
@@ -80,6 +85,14 @@ end
 
 M.setup = function()
     api.nvim_create_user_command("SubstituteHalf", execute, {})
+    -- api.nvim_create_autocmd("CursorMoved", {
+    --     pattern = "*.md",
+    --     callback = function()
+    --         local node = vim.treesitter.get_node()
+    --         local node_type = node:type()
+    --         vim.notify(node_type)
+    --     end,
+    -- })
 end
 
 return M
