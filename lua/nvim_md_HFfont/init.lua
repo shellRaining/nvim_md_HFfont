@@ -49,6 +49,16 @@ local inCodeBlock = function(node)
     return false
 end
 
+local function hasLinkPattern(str)
+    local linkPattern = "%[.-]%(.-%)"
+    local m = str:find(linkPattern)
+    if m then
+        return true
+    else
+        return false
+    end
+end
+
 local function execute()
     local punctuationPositions = findPunctuationPositions()
     -- note the key is number, so can not use # to get len
@@ -63,6 +73,10 @@ local function execute()
     -- get the treesitter node from position
     local cur_buf = api.nvim_get_current_buf()
     for row, linePositions in pairs(punctuationPositions) do
+        local curline = api.nvim_buf_get_lines(cur_buf, row - 1, row, false)[1]
+        if hasLinkPattern(curline) then
+            goto continue
+        end
         for _, col in pairs(linePositions) do
             local node = vim.treesitter.get_node({
                 bufnr = cur_buf,
@@ -80,6 +94,7 @@ local function execute()
                 execute()
             end
         end
+        ::continue::
     end
 end
 
