@@ -69,6 +69,7 @@ local function substituteHalf()
         local line = api.nvim_buf_get_lines(0, startPos.row, startPos.row + 1, false)[1]
         if startPos.col < 0 or startPos.col >= #line then
             inner({ row = startPos.row + 1, col = 0 })
+            return
         end
 
         -- move to start position and search (while jumping to the searched position)
